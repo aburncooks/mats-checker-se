@@ -1,3 +1,4 @@
+import argparse
 import os.path
 import xml.etree.ElementTree as ElementTree
 import sys
@@ -39,21 +40,43 @@ def check_mats(config: dict) -> dict:
 
 
 if __name__ == "__main__":
-    with open("config.yaml", "r") as config_yaml:
-        config = yaml.safe_load(config_yaml.read())
+    """       
+    usage: check_mats.py [-h] [-c [CONFIG]]
+    
+    Determine the blocks that make up a blueprint
+    
+    options:
+      -h, --help                        show this help message and exit
+      -c [CONFIG], --config [CONFIG]    override config.yaml with another, better yaml file
+    """
+    argp = argparse.ArgumentParser(prog="check_mats.py",
+                                   description="Determine the blocks that make up a blueprint")
+    argp.add_argument("-c", "--config",
+                      help="override config.yaml with another, better yaml file",
+                      type=str,
+                      nargs="?")
+    args = argp.parse_args()
 
-    log_setup = NestedSetup([
-            StreamHandler(sys.stdout, level=config["logger"]["level"], bubble=False),
-            TimedRotatingFileHandler(
-                    os.path.abspath("yawm-log"),
-                    level=0,
-                    backup_count=3,
-                    bubble=True,
-                    date_format="%Y-%m-%d")
-        ]
-    )
+    if not args.config:
+        args.config = "config.yaml"
+
+    with open(args.config, "r") as config_yaml:
+        config = yaml.safe_load(config_yaml.read())
+        args.config = config
+
+    log_handlers = []
+    if "handlers" in config["logger"].keys():
+        for handler, options in config["logger"]["handlers"].items():
+            if handler == "stream":
+                log_handlers.append(StreamHandler(sys.stdout, **options))
+            if handler == "timed_rotating_file":
+                log_handlers.append(TimedRotatingFileHandler(os.path.abspath("log/bulk-add-role-groups"), **options))
+
+    log_setup = NestedSetup(log_handlers)  # TODO: what if there are none?
 
     with log_setup:
         my_log.info("Starting check_mats")
-        mats = check_mats(config)
+        my_log.info(f"With options: {vars(args)}")
+        my_log.info(f"With config: {config}")
+        mats = check_mats(**vars(args))
         print(mats)

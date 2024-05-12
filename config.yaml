@@ -1,4 +1,11 @@
 se_path: "/Steam/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks"
 drive: "F:"
 logger:
-  level: 0
+  handlers:
+    stream:
+      level: INFO
+      bubble: false
+#    timed_rotating_file:
+#      level: INFO
+#      bubble: true
+#      date_format: "%Y-%m-%d_%H:%M:%S"
