@@ -72,7 +72,11 @@ if __name__ == "__main__":
             if handler == "timed_rotating_file":
                 log_handlers.append(TimedRotatingFileHandler(os.path.abspath("log/bulk-add-role-groups"), **options))
 
-    log_setup = NestedSetup(log_handlers)  # TODO: what if there are none?
+    if log_handlers is None:
+        my_log.error("No log handlers configured")
+        quit()
+
+    log_setup = NestedSetup(log_handlers)
 
     with log_setup:
         my_log.info("Starting check_mats")
