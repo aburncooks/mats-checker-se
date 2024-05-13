@@ -7,7 +7,6 @@ class TestBlock:
     """
     A test block class for Block class tests
     """
-
     def test_new_block(self):
         """
         Make a new empty block
