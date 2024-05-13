@@ -5,17 +5,15 @@ class Block:
     """
     Contains block details
     """
-    def __init__(self, element: ElementTree):
+    def __init__(self) -> None:
         """
         Create a block class
 
-        :param element: an XML element to create a block from
+        :return: None
         """
         self.type_id = None
         self.sub_type_id = None
         self.display_name = None
-
-        self.from_element(element)
 
     def from_element(self, element: ElementTree) -> None:
         """

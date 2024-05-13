@@ -1,5 +1,4 @@
-se_path: "/Steam/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks"
-drive: "F:"
+se_path: "F:/Steam/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks"
 logger:
   handlers:
     stream:
