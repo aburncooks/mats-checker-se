@@ -1,4 +1,5 @@
 import argparse
+import json
 import os.path
 import sys
 
@@ -12,11 +13,14 @@ from scraper import Scraper
 my_log = Logger(__name__)
 
 
-def check_mats(config: dict) -> dict:
-    scraper = Scraper(config)
+def check_mats(**kwargs) -> dict:
+    scraper = Scraper(kwargs["config"])
     scraper.load_blocks()
 
     bp_file = "blueprints/bp.sbc"
+    if "file" in kwargs.keys():
+        bp_file = kwargs["file"]
+
     bpc = BluePrintChecker(scraper.all_blocks)
 
     return bpc.check_blueprint(bp_file)
@@ -24,16 +28,21 @@ def check_mats(config: dict) -> dict:
 
 if __name__ == "__main__":
     """       
-    usage: check_mats.py [-h] [-c [CONFIG]]
+    usage: check_mats.py [-h] -f FILE [-c [CONFIG]]
     
     Determine the blocks that make up a blueprint
     
     options:
       -h, --help                        show this help message and exit
+      -f FILE, --file FILE              a blueprint to check
       -c [CONFIG], --config [CONFIG]    override config.yaml with another, better yaml file
     """
     argp = argparse.ArgumentParser(prog="check_mats.py",
                                    description="Determine the blocks that make up a blueprint")
+    argp.add_argument("-f", "--file",
+                      help="a blueprint to check",
+                      type=str,
+                      required=True)
     argp.add_argument("-c", "--config",
                       help="override config.yaml with another, better yaml file",
                       type=str,
@@ -65,5 +74,5 @@ if __name__ == "__main__":
         my_log.info("Starting check_mats")
         my_log.info(f"With options: {vars(args)}")
         my_log.info(f"With config: {config}")
-        mats = check_mats(**vars(args))
+        mats = check_mats(config=args.config, file=args.file)
         print(mats)

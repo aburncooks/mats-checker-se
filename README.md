@@ -5,23 +5,19 @@ A script for checking the number of materials needed for a blueprint in Space En
 ```json
 {
   "blocks": {
-    "SmallBlockLargeFlatAtmosphericThrustDShape": 2,
+    "SmallBlockLargeFlatAtmosphericThrustDShapeZZZ": 1,
     "SmallBlockSmallFlatAtmosphericThrust": 10,
     "SmallBlockArmorSlope2Tip": 6,
     "SmallBlockSmallGenerator": 1,
-    "SmallBlockGyro": 1,
-    "SmallBlockBatteryBlock": 2,
-    "SmallBlockRadioAntenna": 1,
-    "SmallBlockCockpit": 1,
-    "ConnectorMedium": 1,
-    "SmallBlockArmorBlock": 2,
-    "SmallControlPanel": 1,
-    "SmallBlockSmallAtmosphericThrustSciFi": 4,
-    "HalfSlopeArmorBlock": 8,
-    "SmallBlockArmorCorner2Tip": 4,
-    "SmallBlockArmorHalfCorner": 2,
-    "HalfArmorBlock": 2
-  }
+  },
+  "components": {
+    "SteelPlate": 175,
+    "Construction": 262,
+    "LargeTube": 18
+  },
+  "unknown_blocks": [
+    "SmallBlockLargeFlatAtmosphericThrustDShapeZZZ"
+  ]
 }
 ```
 
@@ -55,8 +51,7 @@ If you have any custom blocks, as long as they are defined in the same format an
 In `config.yaml` specify the location of your Space Engineers cube data directory and the drive it lives on. You can also pick from logging options.
 
 ```yaml
-se_path: "/Steam/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks"
-drive: "F:"
+se_path: "F:/Steam/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks"
 logger:
   handlers:
     stream:
@@ -73,13 +68,14 @@ logger:
 If you like to use the command line:
 
 ```commandline
-usage: check_mats.py [-h] [-c [CONFIG]]
-
-Determine the blocks that make up a blueprint
-
-options:
-  -h, --help                        show this help message and exit
-  -c [CONFIG], --config [CONFIG]    override config.yaml with another, better yaml file
+    usage: check_mats.py [-h] -f FILE [-c [CONFIG]]
+    
+    Determine the blocks that make up a blueprint
+    
+    options:
+      -h, --help                        show this help message and exit
+      -f FILE, --file FILE              a blueprint to check
+      -c [CONFIG], --config [CONFIG]    override config.yaml with another, better yaml file
 ```
 
 Remember you will still need to have set the paths in the config for this to work.
@@ -87,9 +83,9 @@ Remember you will still need to have set the paths in the config for this to wor
 ## To do
 
 * Custom/modded block support
-* Required components output
 
 ## Dependencies
 
 * PyYAML==6.0.1
 * Logbook==1.7.0.post0
+* pytest==7.4.4

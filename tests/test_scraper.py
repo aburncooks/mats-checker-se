@@ -27,12 +27,17 @@ class TestScraper:
         type_id = "my-type-id"
         sub_type_id = "my-subtype-id"
         display_name = "my-display-name"
+        components = {"sub_type": "Steel Plate", "count": "10"}
 
         block_element = ElementTree.Element("Definition")
         block_id_element = ElementTree.SubElement(block_element, "Id")
         ElementTree.SubElement(block_id_element, "TypeId").text = type_id
         ElementTree.SubElement(block_id_element, "SubtypeId").text = sub_type_id
         ElementTree.SubElement(block_element, "DisplayName").text = display_name
+        component_element = ElementTree.SubElement(block_element, "Components")
+        ElementTree.SubElement(component_element, "Component",
+                               attrib={"Subtype": components["sub_type"],
+                                       "Count": components["count"]})
 
         with TemporaryDirectory() as test_dir:
             scraper = Scraper({"se_path": test_dir})
@@ -44,10 +49,11 @@ class TestScraper:
             scraper.load_blocks()
 
             assert len(scraper.all_blocks) == 1
-            assert scraper.all_blocks[type_id] == {
+            assert scraper.all_blocks[sub_type_id] == {
                 "type_id": type_id,
                 "sub_type_id": sub_type_id,
-                "display_name": display_name
+                "display_name": display_name,
+                "components": {components["sub_type"]: int(components["count"])}
             }
 
     def test_load_blocks_from_directory_non_xml_file(self):
@@ -72,12 +78,17 @@ class TestScraper:
         """
         sub_type_id = "my-subtype-id"
         display_name = "my-display-name"
+        components = {"sub_type": "Steel Plate", "count": "10"}
 
         block_element = ElementTree.Element("Definition")
         block_id_element = ElementTree.SubElement(block_element, "Id")
         ElementTree.SubElement(block_id_element, "TypeId")
         ElementTree.SubElement(block_id_element, "SubtypeId").text = sub_type_id
         ElementTree.SubElement(block_element, "DisplayName").text = display_name
+        component_element = ElementTree.SubElement(block_element, "Components")
+        ElementTree.SubElement(component_element, "Component",
+                               attrib={"Subtype": components["sub_type"],
+                                       "Count": components["count"]})
 
         with TemporaryDirectory() as test_dir:
             scraper = Scraper({"se_path": test_dir})
