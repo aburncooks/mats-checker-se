@@ -14,6 +14,7 @@ class Block:
         self.type_id = None
         self.sub_type_id = None
         self.display_name = None
+        self.components = {}
 
     def from_element(self, element: ElementTree) -> None:
         """
@@ -32,6 +33,14 @@ class Block:
         if self.sub_type_id is None:
             self.sub_type_id = self.type_id
 
+        # components
+        for component in element.find("Components"):
+            component_type = component.attrib["Subtype"]
+            if component_type in self.components.keys():
+                self.components[component_type] += int(component.attrib["Count"])
+            else:
+                self.components[component_type] = int(component.attrib["Count"])
+
     def as_dict(self) -> dict:
         """
         Output a block as a dict
@@ -40,4 +49,5 @@ class Block:
         """
         return {"type_id": self.type_id,
                 "sub_type_id": self.sub_type_id,
-                "display_name": self.display_name}
+                "display_name": self.display_name,
+                "components": self.components}

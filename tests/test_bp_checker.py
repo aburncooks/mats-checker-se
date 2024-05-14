@@ -11,10 +11,13 @@ class TestBluePrintChecker:
     """
     def test_new_bpc(self):
         blocks = {
-          'CubeBlock': {
-            'type_id': 'CubeBlock',
-            'sub_type_id': 'SmallWindowRoundInwardsCornerInv',
-            'display_name': 'DisplayName_Block_WindowRoundInwardsCornerInv'
+          "CubeBlock": {
+            "type_id": "CubeBlock",
+            "sub_type_id": "SmallWindowRoundInwardsCornerInv",
+            "display_name": "DisplayName_Block_WindowRoundInwardsCornerInv",
+            "components": {
+              "SteelPlate": 10
+            }
           }
         }
 
@@ -27,10 +30,13 @@ class TestBluePrintChecker:
         Open a blueprint file
         """
         blocks = {
-          'CubeBlock': {
-            'type_id': 'CubeBlock',
-            'sub_type_id': 'SmallWindowRoundInwardsCornerInv',
-            'display_name': 'DisplayName_Block_WindowRoundInwardsCornerInv'
+          "CubeBlock": {
+            "type_id": "CubeBlock",
+            "sub_type_id": "SmallWindowRoundInwardsCornerInv",
+            "display_name": "DisplayName_Block_WindowRoundInwardsCornerInv",
+            "components": {
+              "SteelPlate": 10
+            }
           }
         }
 
@@ -88,3 +94,57 @@ class TestBluePrintChecker:
         name = bpc.get_block_name(block_element)
 
         assert name == sub_name
+
+    def test_check_blocks(self):
+        """
+        Check the blocks quantity from a tree
+        """
+        sub_type_name = "MyBlock"
+        another_name = "MyOtherBlock"
+
+        grid_element = ElementTree.Element("CubeGrid")
+        blocks_element = ElementTree.SubElement(grid_element, "CubeBlocks")
+        block_element = ElementTree.SubElement(blocks_element, "MyObjectBuilder_CubeBlock")
+        ElementTree.SubElement(block_element, "SubtypeName").text = sub_type_name
+        block_element = ElementTree.SubElement(blocks_element, "MyObjectBuilder_CubeBlock")
+        ElementTree.SubElement(block_element, "SubtypeName").text = sub_type_name
+        block_element = ElementTree.SubElement(blocks_element, "MyObjectBuilder_CubeBlock")
+        ElementTree.SubElement(block_element, "SubtypeName").text = another_name
+
+        tree = ElementTree.ElementTree(grid_element)
+        used_blocks = {
+            sub_type_name: 2,
+            another_name: 1
+        }
+
+        bpc = BluePrintChecker({})
+        blocks = bpc.check_blocks(tree)
+
+        assert used_blocks == blocks
+
+    def test_check_components(self):
+        """
+        Check the components quantity for some blocks
+        """
+        all_blocks = {
+          "LargeRailStraight": {
+            "type_id": "CubeBlock",
+            "sub_type_id": "LargeRailStraight",
+            "display_name": "LargeRailStraight",
+            "components": {
+              "SteelPlate": 12,
+              "Construction": 8
+            }
+          }
+        }
+
+        used_blocks = {
+            "LargeRailStraight": 2,
+            "AnotherBlock": 5
+        }
+
+        bpc = BluePrintChecker(all_blocks)
+        components = bpc.check_components(used_blocks)
+
+        assert components["components"] == {"SteelPlate": 24, "Construction": 16}
+        assert components["unknown_blocks"] == ["AnotherBlock"]

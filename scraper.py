@@ -42,7 +42,7 @@ class Scraper:
                     if block.type_id is None:
                         my_log.warn(f"Skipped due to None type_id: {cube_blocks_file}")
                         continue
-                    self.all_blocks[block.type_id] = block.as_dict()
+                    self.all_blocks[block.sub_type_id] = block.as_dict()
 
             except ElementTree.ParseError:
                 my_log.warn(f"Skipped due to ParseError: {cube_blocks_file}")
