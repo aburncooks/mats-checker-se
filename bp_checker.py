@@ -42,15 +42,13 @@ class BluePrintChecker:
         :return: dict
         """
         used_blocks = {}
-        for element in blueprint.getroot().iter("CubeGrid"):  # only works for one subgrid ??
-            cube_blocks = element.find("CubeBlocks")
-            for block in cube_blocks:
-                sub_type_name = self.get_block_name(block)
+        for block in blueprint.getroot().findall(".//MyObjectBuilder_CubeBlock"):
+            sub_type_name = self.get_block_name(block)
 
-                if sub_type_name in used_blocks.keys():
-                    used_blocks[sub_type_name] += 1
-                else:
-                    used_blocks[sub_type_name] = 1
+            if sub_type_name in used_blocks.keys():
+                used_blocks[sub_type_name] += 1
+            else:
+                used_blocks[sub_type_name] = 1
 
         return used_blocks
 
