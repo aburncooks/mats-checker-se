@@ -15,22 +15,26 @@ class Scraper:
 
     :return: None
     """
-    def __init__(self, config: dict) -> None:
+    def __init__(self) -> None:
         """
         Create a scraper class
         """
         self.all_blocks = {}
-        self.config = config
 
-    def load_blocks(self) -> None:
+    def load_blocks(self, cube_blocks_path) -> None:
         """
-        Load the blocks from files in content directory
+        Load the blocks from files in a content directory
 
         :return: None
         """
-        cube_blocks_path = self.config["se_path"]
+        if not os.path.isdir(cube_blocks_path):
+            my_log.warn(f"cube_blocks_path does not exist = {cube_blocks_path}")
+            return None
 
         for file in os.listdir(cube_blocks_path):
+            if not file.endswith(".sbc"):
+                continue
+
             cube_blocks_file = os.path.join(cube_blocks_path, file)
 
             try:

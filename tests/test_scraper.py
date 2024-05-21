@@ -13,12 +13,9 @@ class TestScraper:
         """
         Make a new Scraper class
         """
-        config = {"some-key": "some-value"}
-
-        scraper = Scraper(config)
+        scraper = Scraper()
 
         assert scraper.all_blocks == {}
-        assert scraper.config == config
 
     def test_load_blocks_from_directory(self):
         """
@@ -40,13 +37,13 @@ class TestScraper:
                                        "Count": components["count"]})
 
         with TemporaryDirectory() as test_dir:
-            scraper = Scraper({"se_path": test_dir})
+            scraper = Scraper()
 
-            xml_path = os.path.join(test_dir, "my_xml_file.xml")
+            xml_path = os.path.join(test_dir, "my_xml_file.sbc")
             element_tree = ElementTree.ElementTree(block_element)
             element_tree.write(xml_path)
 
-            scraper.load_blocks()
+            scraper.load_blocks(test_dir)
 
             assert len(scraper.all_blocks) == 1
             assert scraper.all_blocks[sub_type_id] == {
@@ -56,18 +53,34 @@ class TestScraper:
                 "components": {components["sub_type"]: int(components["count"])}
             }
 
-    def test_load_blocks_from_directory_non_xml_file(self):
+    def test_load_blocks_from_directory_non_xml_sbc_file(self):
         """
         Load blocks from a non xml file in a directory
         """
         with TemporaryDirectory() as test_dir:
-            scraper = Scraper({"se_path": test_dir})
+            scraper = Scraper()
+
+            xml_path = os.path.join(test_dir, "my_xml_file.sbc")
+            with open(xml_path, "w") as xml_file:
+                xml_file.write("My non-XML content")
+
+            scraper.load_blocks(test_dir)
+
+            assert len(scraper.all_blocks) == 0
+            assert scraper.all_blocks == {}
+
+    def test_load_blocks_from_directory_non_sbc_file(self):
+        """
+        Load blocks from a non xml file in a directory
+        """
+        with TemporaryDirectory() as test_dir:
+            scraper = Scraper()
 
             xml_path = os.path.join(test_dir, "my_xml_file.xml")
             with open(xml_path, "w") as xml_file:
                 xml_file.write("My non-XML content")
 
-            scraper.load_blocks()
+            scraper.load_blocks(test_dir)
 
             assert len(scraper.all_blocks) == 0
             assert scraper.all_blocks == {}
@@ -91,13 +104,40 @@ class TestScraper:
                                        "Count": components["count"]})
 
         with TemporaryDirectory() as test_dir:
-            scraper = Scraper({"se_path": test_dir})
+            scraper = Scraper()
 
-            xml_path = os.path.join(test_dir, "my_xml_file.xml")
+            xml_path = os.path.join(test_dir, "my_xml_file.sbc")
             element_tree = ElementTree.ElementTree(block_element)
             element_tree.write(xml_path)
 
-            scraper.load_blocks()
+            scraper.load_blocks(test_dir)
 
             assert len(scraper.all_blocks) == 0
             assert scraper.all_blocks == {}
+
+    def test_load_blocks_from_missing_directory(self):
+        """
+        Load blocks from a directory that does not exist
+        """
+        scraper = Scraper()
+        scraper.load_blocks("missing/path")
+
+        assert len(scraper.all_blocks) == 0
+        assert scraper.all_blocks == {}
+
+    def test_load_blocks_from_file(self):
+        """
+        Load blocks from a file instead of directory
+        """
+        with TemporaryDirectory() as test_dir:
+            scraper = Scraper()
+
+            xml_path = os.path.join(test_dir, "my_xml_file.sbc")
+            block_element = ElementTree.Element("Definition")
+            element_tree = ElementTree.ElementTree(block_element)
+            element_tree.write(xml_path)
+
+            scraper.load_blocks(xml_path)
+
+        assert len(scraper.all_blocks) == 0
+        assert scraper.all_blocks == {}

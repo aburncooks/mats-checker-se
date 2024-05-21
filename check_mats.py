@@ -14,8 +14,13 @@ my_log = Logger(__name__)
 
 
 def check_mats(**kwargs) -> dict:
-    scraper = Scraper(kwargs["config"])
-    scraper.load_blocks()
+    scraper = Scraper()
+    scraper.load_blocks(os.path.join(kwargs["config"]["se_path"], "Data", "CubeBlocks"))
+
+    if kwargs["modded_blocks"]:
+        modded_dirs = next(os.walk(kwargs["config"]["mods_path"]))[1]
+        for mod in modded_dirs:
+            scraper.load_blocks(os.path.join(kwargs["config"]["mods_path"], mod, "Data", "CubeBlocks"))
 
     bp_file = "blueprints/bp.sbc"
     if "file" in kwargs.keys():
@@ -28,14 +33,15 @@ def check_mats(**kwargs) -> dict:
 
 if __name__ == "__main__":
     """       
-    usage: check_mats.py [-h] -f FILE [-c [CONFIG]]
+    usage: check_mats.py [-h] -f FILE [-c [CONFIG]] [-mb | --modded-blocks]
     
     Determine the blocks that make up a blueprint
     
     options:
-      -h, --help                        show this help message and exit
-      -f FILE, --file FILE              a blueprint to check
-      -c [CONFIG], --config [CONFIG]    override config.yaml with another, better yaml file
+      -h, --help                      show this help message and exit
+      -f FILE, --file FILE            a blueprint to check
+      -c [CONFIG], --config [CONFIG]  override config.yaml with another, better yaml file
+      -mb, --modded-blocks            load modded blocks from mods path
     """
     argp = argparse.ArgumentParser(prog="check_mats.py",
                                    description="Determine the blocks that make up a blueprint")
@@ -47,6 +53,10 @@ if __name__ == "__main__":
                       help="override config.yaml with another, better yaml file",
                       type=str,
                       nargs="?")
+    argp.add_argument("-mb", "--modded-blocks",
+                      help="load modded blocks from mods path",
+                      action=argparse.BooleanOptionalAction,
+                      default=False)
     args = argp.parse_args()
 
     if not args.config:
@@ -74,5 +84,5 @@ if __name__ == "__main__":
         my_log.info("Starting check_mats")
         my_log.info(f"With options: {vars(args)}")
         my_log.info(f"With config: {config}")
-        mats = check_mats(config=args.config, file=args.file)
+        mats = check_mats(config=args.config, file=args.file, modded_blocks=args.modded_blocks)
         print(mats)
