@@ -51,7 +51,8 @@ If you have any custom blocks, as long as they are defined in the same format an
 In `config.yaml` specify the location of your Space Engineers cube data directory and the drive it lives on. You can also pick from logging options.
 
 ```yaml
-se_path: "F:/Steam/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks"
+se_path: "F:/Steam/steamapps/common/SpaceEngineers/Content"
+mods_path: "F:/Steam/steamapps/workshop/content/244850"
 logger:
   handlers:
     stream:
@@ -68,21 +69,22 @@ logger:
 If you like to use the command line:
 
 ```commandline
-    usage: check_mats.py [-h] -f FILE [-c [CONFIG]]
+    usage: check_mats.py [-h] -f FILE [-c [CONFIG]] [-mb | --modded-blocks]
     
     Determine the blocks that make up a blueprint
     
     options:
-      -h, --help                        show this help message and exit
-      -f FILE, --file FILE              a blueprint to check
-      -c [CONFIG], --config [CONFIG]    override config.yaml with another, better yaml file
+      -h, --help                      show this help message and exit
+      -f FILE, --file FILE            a blueprint to check
+      -c [CONFIG], --config [CONFIG]  override config.yaml with another, better yaml file
+      -mb, --modded-blocks            load modded blocks from mods path
 ```
 
 Remember you will still need to have set the paths in the config for this to work.
 
 ## To do
 
-* Custom/modded block support
+* TBC
 
 ## Dependencies
 
