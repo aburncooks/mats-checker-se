@@ -84,7 +84,9 @@ Remember you will still need to have set the paths in the config for this to wor
 
 ## To do
 
-* TBC
+* Display component materials estimates
+* Configurable production pipeline
+* Turn this into an engine and add a lovely frontend
 
 ## Dependencies
 
