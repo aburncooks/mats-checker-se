@@ -51,3 +51,51 @@ class Block:
                 "sub_type_id": self.sub_type_id,
                 "display_name": self.display_name,
                 "components": self.components}
+
+
+class Recipe:
+    """
+    Contains recipe details
+    """
+    def __init__(self) -> None:
+        """
+        Create a Recipe class
+
+        :return: None
+        """
+        self.materials = {}
+        self.output_type_id = None
+        self.output_quantity = None
+
+    def from_element(self, element: ElementTree) -> None:
+        """
+        Populate a recipe from an element
+
+        :param element: an XML element to create a recipe from
+        :return: None
+        """
+        this_result = element.find("Result")
+
+        if this_result is None:
+            return None
+
+        if this_result.attrib["TypeId"] is not None and this_result.attrib["TypeId"] != "Component":
+            return None
+
+        self.output_type_id = this_result.attrib["SubtypeId"]
+        self.output_quantity = float(this_result.attrib["Amount"])
+
+        for mat in element.find("Prerequisites"):
+            self.materials[mat.attrib["SubtypeId"]] = float(mat.attrib["Amount"])
+
+    def as_dict(self) -> dict:
+        """
+        Output a recipe as a dict
+
+        :return: dict
+        """
+        return {
+            "materials": self.materials,
+            "output_type_id": self.output_type_id,
+            "output_quantity": self.output_quantity
+        }

@@ -1,5 +1,4 @@
 import argparse
-import json
 import os.path
 import sys
 
@@ -22,11 +21,13 @@ def check_mats(**kwargs) -> dict:
         for mod in modded_dirs:
             scraper.load_blocks(os.path.join(kwargs["config"]["mods_path"], mod, "Data", "CubeBlocks"))
 
+    scraper.load_recipes(os.path.join(kwargs["config"]["se_path"], "Data", "Blueprints.sbc"))
+
     bp_file = "blueprints/bp.sbc"
     if "file" in kwargs.keys():
         bp_file = kwargs["file"]
 
-    bpc = BluePrintChecker(scraper.all_blocks)
+    bpc = BluePrintChecker(scraper.all_blocks, scraper.all_recipes)
 
     return bpc.check_blueprint(bp_file)
 

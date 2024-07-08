@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ElementTree
 
-from models import Block
+from models import Block, Recipe
 
 
 class TestBlock:
@@ -90,4 +90,109 @@ class TestBlock:
             "sub_type_id": sub_type_id,
             "display_name": display_name,
             "components": components
+        }
+
+
+class TestRecipe:
+    """
+    A test recipe class for Recipe class tests
+    """
+    def test_new_recipe(self):
+        """
+        Make a new empty recipe
+        """
+        recipe = Recipe()
+
+        assert recipe.materials == {}
+        assert recipe.output_type_id is None
+        assert recipe.output_quantity is None
+
+    def test_new_recipe_from_element(self):
+        """
+        Make a new recipe from an element
+        """
+        type_id = "Component"
+        amount = 1
+        sub_type_id = "some-subtype-id"
+        materials = {
+            "mat-1": 20,
+            "mat-2": 10
+        }
+
+        recipe_element = ElementTree.Element("Blueprint")
+        ElementTree.SubElement(recipe_element, "Result",
+                               attrib={"SubtypeId": sub_type_id,
+                                       "Amount": amount,
+                                       "TypeId": type_id})
+        prerequisites_element = ElementTree.SubElement(recipe_element, "Prerequisites")
+        for material, m_quantity in materials.items():
+            ElementTree.SubElement(prerequisites_element, "Item",
+                                   attrib={"SubtypeId": material,
+                                           "Amount": m_quantity})
+
+        recipe = Recipe()
+        recipe.from_element(recipe_element)
+
+        assert recipe.materials == materials
+        assert recipe.output_quantity == amount
+        assert recipe.output_type_id == sub_type_id
+
+    def test_new_recipe_from_element_no_result(self):
+        """
+        Make a new recipe from an element but there is no Result element
+        """
+        recipe_element = ElementTree.Element("Blueprint")
+
+        recipe = Recipe()
+        recipe.from_element(recipe_element)
+
+        assert recipe.materials == {}
+        assert recipe.output_quantity is None
+        assert recipe.output_type_id is None
+
+    def test_new_recipe_from_element_not_component(self):
+        """
+        Make a new recipe from an element that is not a component
+        """
+        type_id = "Ingot"
+        amount = 1
+        sub_type_id = "some-subtype-id"
+        materials = {
+            "mat-1": 20,
+            "mat-2": 10
+        }
+
+        recipe_element = ElementTree.Element("Blueprint")
+        ElementTree.SubElement(recipe_element, "Result",
+                               attrib={"SubtypeId": sub_type_id,
+                                       "Amount": amount,
+                                       "TypeId": type_id})
+
+        recipe = Recipe()
+        recipe.from_element(recipe_element)
+
+        assert recipe.materials == {}
+        assert recipe.output_quantity is None
+        assert recipe.output_type_id is None
+
+    def test_return_recipe_as_dict(self):
+        """
+        Return a recipe as a dictionary
+        """
+        amount = 1
+        sub_type_id = "some-subtype-id"
+        materials = {
+            "mat-1": 20,
+            "mat-2": 10
+        }
+
+        recipe = Recipe()
+        recipe.materials = materials
+        recipe.output_type_id = sub_type_id
+        recipe.output_quantity = amount
+
+        assert recipe.as_dict() == {
+            "materials": materials,
+            "output_type_id": sub_type_id,
+            "output_quantity": amount
         }
