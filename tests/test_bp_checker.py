@@ -21,9 +21,20 @@ class TestBluePrintChecker:
           }
         }
 
-        bpc = BluePrintChecker(blocks)
+        recipes = {
+            "SteelPlate": {
+                "materials": {
+                    "Iron": 21.0
+                },
+                "output_type_id": "SteelPlate",
+                "output_quantity": 1.0
+            }
+        }
+
+        bpc = BluePrintChecker(blocks, recipes)
 
         assert bpc.blocks == blocks
+        assert bpc.components == recipes
 
     def test_open_bp(self):
         """
@@ -40,7 +51,17 @@ class TestBluePrintChecker:
           }
         }
 
-        bpc = BluePrintChecker(blocks)
+        recipes = {
+            "SteelPlate": {
+                "materials": {
+                    "Iron": 21.0
+                },
+                "output_type_id": "SteelPlate",
+                "output_quantity": 1.0
+            }
+        }
+
+        bpc = BluePrintChecker(blocks, recipes)
         element = ElementTree.Element("MyKey")
 
         with TemporaryDirectory() as test_dir:
@@ -56,7 +77,7 @@ class TestBluePrintChecker:
         """
         Open a blueprint file that isn't XML
         """
-        bpc = BluePrintChecker({})
+        bpc = BluePrintChecker({}, {})
 
         with TemporaryDirectory() as test_dir:
             xml_path = os.path.join(test_dir, "my_bp_file.xml")
@@ -71,7 +92,7 @@ class TestBluePrintChecker:
         """
         Get a block name from SubtypeName
         """
-        bpc = BluePrintChecker({})
+        bpc = BluePrintChecker({}, {})
         sub_type_name = "FancyBlockName"
 
         block_element = ElementTree.Element("xyz_SomeBlock", attrib={"xsi:type": "xyz_SomeBlock"})
@@ -85,7 +106,7 @@ class TestBluePrintChecker:
         """
         Get a block name without SubtypeName
         """
-        bpc = BluePrintChecker({})
+        bpc = BluePrintChecker({}, {})
         sub_name = "FancyBlockName"
 
         block_element = ElementTree.Element(f"xyz_{sub_name}", attrib={"xsi:type": f"xyz_{sub_name}"})
@@ -117,7 +138,7 @@ class TestBluePrintChecker:
             another_name: 1
         }
 
-        bpc = BluePrintChecker({})
+        bpc = BluePrintChecker({}, {})
         blocks = bpc.check_blocks(tree)
 
         assert used_blocks == blocks
@@ -143,8 +164,30 @@ class TestBluePrintChecker:
             "AnotherBlock": 5
         }
 
-        bpc = BluePrintChecker(all_blocks)
+        bpc = BluePrintChecker(all_blocks, {})
         components = bpc.check_components(used_blocks)
 
         assert components["components"] == {"SteelPlate": 24, "Construction": 16}
         assert components["unknown_blocks"] == ["AnotherBlock"]
+
+    def test_check_mats(self):
+        all_recipes = {
+            "SteelPlate": {
+                "materials": {
+                    "Iron": 21.0
+                },
+                "output_type_id": "SteelPlate",
+                "output_quantity": 1.0
+            }
+        }
+
+        used_components = {
+            "SteelPlate": 10,
+            "AnotherComponent": 11
+        }
+
+        bpc = BluePrintChecker({}, all_recipes)
+        mats = bpc.check_mats(used_components)
+
+        assert mats["materials"] == {"Iron": 210.0}
+        assert mats["unknown_components"] == ["AnotherComponent"]

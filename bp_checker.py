@@ -8,9 +8,9 @@ my_log = Logger(__name__)
 
 class BluePrintChecker:
     """
-    Checks blue print details
+    Checks blueprint details
     """
-    def __init__(self, blocks: dict) -> None:
+    def __init__(self, blocks: dict, components: dict) -> None:
         """
         Create a BluePrintChecker class
 
@@ -18,6 +18,7 @@ class BluePrintChecker:
         :return: None
         """
         self.blocks = blocks  # for calculating component costs later
+        self.components = components  # for calculating materials estimate later
 
     def check_blueprint(self, bp_file: str) -> dict:
         """
@@ -29,10 +30,12 @@ class BluePrintChecker:
         blueprint = self.open_blueprint(bp_file)
         blocks = self.check_blocks(blueprint)
         components = self.check_components(blocks)
+        materials = self.check_mats(components["components"])
 
         return {"blocks": blocks,
                 "components": components["components"],
-                "unknown_blocks": components["unknown_blocks"]}
+                "unknown_blocks": components["unknown_blocks"],
+                "materials_estimate": materials["materials"]}
 
     def check_blocks(self, blueprint: ElementTree) -> dict:
         """
@@ -76,6 +79,32 @@ class BluePrintChecker:
 
         return {"components": used_components,
                 "unknown_blocks": unknown_blocks}
+
+    # TODO: I'm sure this name won't become confusing at all
+    def check_mats(self, components: dict) -> dict:
+        """
+        Estimates the materials required to build the components
+
+        :param components: a dict of the components
+        :return: dict
+        """
+        used_materials = {}
+        unknown_components = []
+        for component, c_quantity in components.items():
+            if component not in self.components.keys():
+                # unknown component type
+                my_log.warn(f"Unknown component type: {component}")
+                unknown_components.append(component)
+                continue
+
+            for material, m_quantity in self.components[component]["materials"].items():
+                if material in used_materials.keys():
+                    used_materials[material] += m_quantity * c_quantity
+                else:
+                    used_materials[material] = m_quantity * c_quantity
+
+        return {"materials": used_materials,
+                "unknown_components": unknown_components}
 
     @staticmethod
     def open_blueprint(bp_file: str) -> ElementTree:

@@ -16,6 +16,7 @@ class TestScraper:
         scraper = Scraper()
 
         assert scraper.all_blocks == {}
+        assert scraper.all_recipes == {}
 
     def test_load_blocks_from_directory(self):
         """
@@ -141,3 +142,48 @@ class TestScraper:
 
         assert len(scraper.all_blocks) == 0
         assert scraper.all_blocks == {}
+
+    def test_load_recipes_from_directory(self):
+        """
+        Load recipes from an xml file in a directory
+        """
+        type_id = "Component"
+        amount = "1"
+        sub_type_id = "some-subtype-id"
+        materials = {"sub_type": "mat-1", "count": "10"}
+
+        recipe_element = ElementTree.Element("Blueprint")
+        ElementTree.SubElement(recipe_element, "Result",
+                               attrib={"SubtypeId": sub_type_id,
+                                       "Amount": amount,
+                                       "TypeId": type_id})
+        prerequisites_element = ElementTree.SubElement(recipe_element, "Prerequisites")
+        ElementTree.SubElement(prerequisites_element, "Item",
+                               attrib={"SubtypeId": materials["sub_type"],
+                                       "Amount": materials["count"]})
+
+        with TemporaryDirectory() as test_dir:
+            scraper = Scraper()
+
+            xml_path = os.path.join(test_dir, "my_xml_file.sbc")
+            element_tree = ElementTree.ElementTree(recipe_element)
+            element_tree.write(xml_path)
+
+            scraper.load_recipes(xml_path)
+
+            assert len(scraper.all_recipes) == 1
+            assert scraper.all_recipes[sub_type_id] == {
+                "output_type_id": sub_type_id,
+                "output_quantity": int(amount),
+                "materials": {materials["sub_type"]: float(materials["count"])}
+            }
+
+    def test_load_recipes_from_missing_file(self):
+        """
+        Load recipes from a file that does not exist
+        """
+        scraper = Scraper()
+        scraper.load_recipes("missing/path")
+
+        assert len(scraper.all_recipes) == 0
+        assert scraper.all_recipes == {}

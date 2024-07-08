@@ -8,7 +8,7 @@ A script for checking the number of materials needed for a blueprint in Space En
     "SmallBlockLargeFlatAtmosphericThrustDShapeZZZ": 1,
     "SmallBlockSmallFlatAtmosphericThrust": 10,
     "SmallBlockArmorSlope2Tip": 6,
-    "SmallBlockSmallGenerator": 1,
+    "SmallBlockSmallGenerator": 1
   },
   "components": {
     "SteelPlate": 175,
@@ -17,7 +17,12 @@ A script for checking the number of materials needed for a blueprint in Space En
   },
   "unknown_blocks": [
     "SmallBlockLargeFlatAtmosphericThrustDShapeZZZ"
-  ]
+  ], 
+  "materials_estimate": {
+    "Iron": 8522.0, 
+    "Silicon": 57.0, 
+    "Nickel": 490.0
+  }
 }
 ```
 
@@ -45,6 +50,28 @@ The scraper script will iterate through all of these files and compile a list of
 Blocks are indexed using their TypeId first, then SubtypeId and DisplayName. If a block does not have a SubtypeId defined, then the TypeId will be used instead.
 
 If you have any custom blocks, as long as they are defined in the same format and saved in the same location, then they should just work. Full support for modded and custom blocks is coming soon.
+
+## Recipes
+
+Recipes for components are defined in an .sbc (xml format file), in the Space Engineers Data folder called `Blueprints.sbc`.
+
+```xml
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <Blueprints>
+		<!-- Components -->
+        <Blueprint>
+            ...
+            <Prerequisites>
+                <Item Amount="8" TypeId="Ingot" SubtypeId="Iron" />
+            </Prerequisites>
+            <Result Amount="1" TypeId="Component" SubtypeId="Construction" />
+            ...
+        </Blueprint>
+    ...
+```
+
+Support for custom components will happen at some point in the future!
 
 ## Configuration
 
@@ -84,7 +111,7 @@ Remember you will still need to have set the paths in the config for this to wor
 
 ## To do
 
-* Display component materials estimates
+* Materials estimates for custom components and custom recipes
 * Configurable production pipeline
 * Turn this into an engine and add a lovely frontend
 
