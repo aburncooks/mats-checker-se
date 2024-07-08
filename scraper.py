@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ElementTree
 
 from logbook import Logger
 
-from models import Block
+from models import Block, Recipe
 
 
 my_log = Logger(__name__)
@@ -20,8 +20,9 @@ class Scraper:
         Create a scraper class
         """
         self.all_blocks = {}
+        self.all_recipes = {}
 
-    def load_blocks(self, cube_blocks_path) -> None:
+    def load_blocks(self, cube_blocks_path: str) -> None:
         """
         Load the blocks from files in a content directory
 
@@ -51,3 +52,27 @@ class Scraper:
             except ElementTree.ParseError:
                 my_log.warn(f"Skipped due to ParseError: {cube_blocks_file}")
                 continue
+
+    def load_recipes(self, recipes_file: str) -> None:
+        """
+        Load the recipes from the recipes blueprint file
+
+        :return: None
+        """
+        if not os.path.isfile(recipes_file):
+            my_log.warn(f"recipes_file does not exist = {recipes_file}")
+            return None
+
+        try:
+            tree = ElementTree.parse(recipes_file)
+            for element in tree.getroot().iter("Blueprint"):
+                recipe = Recipe()
+                recipe.from_element(element)
+
+                if recipe.output_type_id is None:
+                    continue
+
+                self.all_recipes[recipe.output_type_id] = recipe.as_dict()
+
+        except ElementTree.ParseError:
+            my_log.warn(f"Skipped due to ParseError: {recipes_file}")
